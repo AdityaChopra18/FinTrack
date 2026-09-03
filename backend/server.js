@@ -20,6 +20,11 @@ app.use('/api/budgets', budgetRoutes);
 app.use('/api/savings', savingRoutes);
 app.use('/api/auth', authRoutes);
 
+// Health check endpoint for uptime monitors
+app.get('/api/health', (req, res) => {
+  res.status(200).json({ status: 'awake', time: new Date() });
+});
+
 // Root endpoint
 app.get('/', (req, res) => {
   res.json({ message: 'Welcome to FinTrack API' });
