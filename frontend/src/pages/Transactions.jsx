@@ -51,6 +51,7 @@ const Transactions = () => {
       });
     } catch (err) {
       console.error(err);
+      alert('Error saving transaction. Check console or network tab. Details: ' + err.message);
     }
   };
 
