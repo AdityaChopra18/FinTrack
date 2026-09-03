@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import { Plus, Trash2 } from 'lucide-react';
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+import api from '../utils/api';
 const DEFAULT_CATEGORIES = [
   'Food', 'Transport', 'Housing', 'Entertainment', 'Health', 'Shopping', 'Education', 'Other'
 ];
@@ -14,7 +12,7 @@ const Budgets = () => {
 
   const fetchBudgets = async () => {
     try {
-      const res = await axios.get(`${API_URL}/budgets`);
+      const res = await api.get('/budgets');
       setBudgets(res.data);
     } catch (err) {
       console.error(err);
@@ -28,7 +26,7 @@ const Budgets = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post(`${API_URL}/budgets`, formData);
+      await api.post('/budgets', formData);
       setShowModal(false);
       fetchBudgets();
       setFormData({ category: 'Food', monthly_limit: '' });
@@ -40,7 +38,7 @@ const Budgets = () => {
   const handleDelete = async (id) => {
     if (window.confirm('Delete this budget?')) {
       try {
-        await axios.delete(`${API_URL}/budgets/${id}`);
+        await api.delete(`/budgets/${id}`);
         fetchBudgets();
       } catch (err) {
         console.error(err);

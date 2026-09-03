@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import { IndianRupee, ArrowDownCircle, ArrowUpCircle, Wallet } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip, Legend } from 'recharts';
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+import api from '../utils/api';
 const COLORS = ['#2563eb', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316'];
 
 const Dashboard = () => {
@@ -20,8 +18,8 @@ const Dashboard = () => {
     const fetchData = async () => {
       try {
         const [summaryRes, transRes] = await Promise.all([
-          axios.get(`${API_URL}/transactions/summary`),
-          axios.get(`${API_URL}/transactions`)
+          api.get('/transactions/summary'),
+          api.get('/transactions')
         ]);
         setSummary(summaryRes.data);
         setRecentTransactions(transRes.data.slice(0, 5));

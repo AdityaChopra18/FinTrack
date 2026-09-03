@@ -1,14 +1,15 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../db');
+const auth = require('../middleware/authMiddleware');
 
 // Get all transactions with optional filters
-router.get('/', async (req, res) => {
+router.get('/', auth, async (req, res) => {
   try {
     const { type, category, month } = req.query;
-    let query = 'SELECT * FROM transactions WHERE 1=1';
-    let params = [];
-    let paramIndex = 1;
+    let query = 'SELECT * FROM transactions WHERE user_id = $1';
+    let params = [req.user.id];
+    let paramIndex = 2;
 
     if (type) {
       query += ` AND type = $${paramIndex}`;
@@ -38,16 +39,17 @@ router.get('/', async (req, res) => {
 });
 
 // Get transactions summary
-router.get('/summary', async (req, res) => {
+router.get('/summary', auth, async (req, res) => {
   try {
-    const incomeQuery = "SELECT SUM(amount) as total_income FROM transactions WHERE type = 'income'";
-    const expenseQuery = "SELECT SUM(amount) as total_expense FROM transactions WHERE type = 'expense'";
-    const categoryQuery = "SELECT category, SUM(amount) as total FROM transactions WHERE type = 'expense' GROUP BY category ORDER BY total DESC";
+    const userId = req.user.id;
+    const incomeQuery = "SELECT SUM(amount) as total_income FROM transactions WHERE user_id = $1 AND type = 'income'";
+    const expenseQuery = "SELECT SUM(amount) as total_expense FROM transactions WHERE user_id = $1 AND type = 'expense'";
+    const categoryQuery = "SELECT category, SUM(amount) as total FROM transactions WHERE user_id = $1 AND type = 'expense' GROUP BY category ORDER BY total DESC";
 
     const [incomeResult, expenseResult, categoryResult] = await Promise.all([
-      db.query(incomeQuery),
-      db.query(expenseQuery),
-      db.query(categoryQuery)
+      db.query(incomeQuery, [userId]),
+      db.query(expenseQuery, [userId]),
+      db.query(categoryQuery, [userId])
     ]);
 
     const totalIncome = incomeResult.rows[0].total_income || 0;
@@ -70,15 +72,15 @@ router.get('/summary', async (req, res) => {
 });
 
 // Create a transaction
-router.post('/', async (req, res) => {
+router.post('/', auth, async (req, res) => {
   try {
     const { type, amount, category, description, date } = req.body;
     const query = `
-      INSERT INTO transactions (type, amount, category, description, date)
-      VALUES ($1, $2, $3, $4, $5)
+      INSERT INTO transactions (user_id, type, amount, category, description, date)
+      VALUES ($1, $2, $3, $4, $5, $6)
       RETURNING *
     `;
-    const { rows } = await db.query(query, [type, amount, category, description, date]);
+    const { rows } = await db.query(query, [req.user.id, type, amount, category, description, date]);
     res.status(201).json(rows[0]);
   } catch (err) {
     console.error(err);
@@ -87,17 +89,17 @@ router.post('/', async (req, res) => {
 });
 
 // Update a transaction
-router.put('/:id', async (req, res) => {
+router.put('/:id', auth, async (req, res) => {
   try {
     const { id } = req.params;
     const { type, amount, category, description, date } = req.body;
     const query = `
       UPDATE transactions
       SET type = $1, amount = $2, category = $3, description = $4, date = $5
-      WHERE id = $6
+      WHERE id = $6 AND user_id = $7
       RETURNING *
     `;
-    const { rows } = await db.query(query, [type, amount, category, description, date, id]);
+    const { rows } = await db.query(query, [type, amount, category, description, date, id, req.user.id]);
     if (rows.length === 0) {
       return res.status(404).json({ error: 'Transaction not found' });
     }
@@ -109,11 +111,11 @@ router.put('/:id', async (req, res) => {
 });
 
 // Delete a transaction
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', auth, async (req, res) => {
   try {
     const { id } = req.params;
-    const query = 'DELETE FROM transactions WHERE id = $1 RETURNING *';
-    const { rows } = await db.query(query, [id]);
+    const query = 'DELETE FROM transactions WHERE id = $1 AND user_id = $2 RETURNING *';
+    const { rows } = await db.query(query, [id, req.user.id]);
     if (rows.length === 0) {
       return res.status(404).json({ error: 'Transaction not found' });
     }

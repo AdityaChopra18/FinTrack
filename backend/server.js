@@ -13,10 +13,12 @@ app.use(express.json());
 const transactionRoutes = require('./routes/transactions');
 const budgetRoutes = require('./routes/budgets');
 const savingRoutes = require('./routes/savings');
+const authRoutes = require('./routes/auth');
 
 app.use('/api/transactions', transactionRoutes);
 app.use('/api/budgets', budgetRoutes);
 app.use('/api/savings', savingRoutes);
+app.use('/api/auth', authRoutes);
 
 // Root endpoint
 app.get('/', (req, res) => {

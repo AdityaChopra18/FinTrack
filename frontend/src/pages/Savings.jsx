@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import { Plus, Trash2, TrendingUp } from 'lucide-react';
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+import api from '../utils/api';
 
 const Savings = () => {
   const [goals, setGoals] = useState([]);
@@ -19,7 +17,7 @@ const Savings = () => {
 
   const fetchGoals = async () => {
     try {
-      const res = await axios.get(`${API_URL}/savings`);
+      const res = await api.get('/savings');
       setGoals(res.data);
     } catch (err) {
       console.error(err);
@@ -33,7 +31,7 @@ const Savings = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post(`${API_URL}/savings`, formData);
+      await api.post('/savings', formData);
       setShowModal(false);
       fetchGoals();
       setFormData({ name: '', target_amount: '', target_date: '' });
@@ -46,7 +44,7 @@ const Savings = () => {
     e.preventDefault();
     try {
       const newAmount = parseFloat(selectedGoal.current_amount) + parseFloat(addAmount);
-      await axios.patch(`${API_URL}/savings/${selectedGoal.id}`, { current_amount: newAmount });
+      await api.patch(`/savings/${selectedGoal.id}`, { current_amount: newAmount });
       setShowAddMoneyModal(false);
       fetchGoals();
       setAddAmount('');
@@ -59,7 +57,7 @@ const Savings = () => {
   const handleDelete = async (id) => {
     if (window.confirm('Delete this savings goal?')) {
       try {
-        await axios.delete(`${API_URL}/savings/${id}`);
+        await api.delete(`/savings/${id}`);
         fetchGoals();
       } catch (err) {
         console.error(err);

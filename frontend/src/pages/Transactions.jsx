@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import { Plus, Trash2, Edit2 } from 'lucide-react';
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+import api from '../utils/api';
 
 const EXPENSE_CATEGORIES = [
   'Food', 'Transport', 'Housing', 'Entertainment', 'Health', 'Shopping', 'Education', 'Other'
@@ -26,7 +24,7 @@ const Transactions = () => {
 
   const fetchTransactions = async () => {
     try {
-      const res = await axios.get(`${API_URL}/transactions`);
+      const res = await api.get('/transactions');
       setTransactions(res.data);
     } catch (err) {
       console.error(err);
@@ -42,7 +40,7 @@ const Transactions = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post(`${API_URL}/transactions`, formData);
+      await api.post('/transactions', formData);
       setShowModal(false);
       fetchTransactions();
       setFormData({
@@ -61,7 +59,7 @@ const Transactions = () => {
   const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this transaction?')) {
       try {
-        await axios.delete(`${API_URL}/transactions/${id}`);
+        await api.delete(`/transactions/${id}`);
         fetchTransactions();
       } catch (err) {
         console.error(err);
