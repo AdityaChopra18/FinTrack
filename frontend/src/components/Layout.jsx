@@ -1,19 +1,49 @@
-import React, { useContext } from 'react';
-import { Outlet, NavLink } from 'react-router-dom';
-import { LayoutDashboard, Receipt, PieChart, PiggyBank, LogOut } from 'lucide-react';
+import React, { useContext, useState, useEffect } from 'react';
+import { Outlet, NavLink, useLocation } from 'react-router-dom';
+import { LayoutDashboard, Receipt, PieChart, PiggyBank, LogOut, Menu, X } from 'lucide-react';
 import { AuthContext } from '../context/AuthContext';
 
 const Layout = () => {
   const { logout, user } = useContext(AuthContext);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const location = useLocation();
+
+  // Close mobile menu when navigating
+  useEffect(() => {
+    setIsMobileMenuOpen(false);
+  }, [location.pathname]);
 
   return (
     <div className="app-container">
-      <aside className="sidebar">
-        <div style={{ marginBottom: '40px', display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <div style={{ background: 'var(--primary)', color: 'white', padding: '8px', borderRadius: '8px', display: 'flex' }}>
-            <PiggyBank size={24} />
+      {/* Mobile Header */}
+      <header className="mobile-header">
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <div style={{ background: 'var(--primary)', color: 'white', padding: '6px', borderRadius: '8px', display: 'flex' }}>
+            <PiggyBank size={20} />
           </div>
-          <h2 style={{ margin: 0 }}>FinTrack</h2>
+          <h2 style={{ margin: 0, fontSize: '18px' }}>FinTrack</h2>
+        </div>
+        <button className="menu-btn" onClick={() => setIsMobileMenuOpen(true)}>
+          <Menu size={24} />
+        </button>
+      </header>
+
+      {/* Mobile Overlay */}
+      {isMobileMenuOpen && (
+        <div className="mobile-menu-overlay" onClick={() => setIsMobileMenuOpen(false)} />
+      )}
+
+      <aside className={`sidebar ${isMobileMenuOpen ? 'open' : ''}`}>
+        <div className="sidebar-header" style={{ marginBottom: '40px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <div style={{ background: 'var(--primary)', color: 'white', padding: '8px', borderRadius: '8px', display: 'flex' }}>
+              <PiggyBank size={24} />
+            </div>
+            <h2 style={{ margin: 0 }}>FinTrack</h2>
+          </div>
+          <button className="close-menu-btn" onClick={() => setIsMobileMenuOpen(false)}>
+            <X size={24} />
+          </button>
         </div>
         
         <nav style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
