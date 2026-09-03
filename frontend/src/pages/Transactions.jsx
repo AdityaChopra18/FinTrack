@@ -4,8 +4,11 @@ import { Plus, Trash2, Edit2 } from 'lucide-react';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
-const DEFAULT_CATEGORIES = [
+const EXPENSE_CATEGORIES = [
   'Food', 'Transport', 'Housing', 'Entertainment', 'Health', 'Shopping', 'Education', 'Other'
+];
+const INCOME_CATEGORIES = [
+  'Salary', 'Freelance', 'Investments', 'Gifts', 'Refunds', 'Other'
 ];
 
 const Transactions = () => {
@@ -16,7 +19,7 @@ const Transactions = () => {
   const [formData, setFormData] = useState({
     type: 'expense',
     amount: '',
-    category: 'Food',
+    category: EXPENSE_CATEGORIES[0],
     description: '',
     date: new Date().toISOString().split('T')[0]
   });
@@ -45,7 +48,7 @@ const Transactions = () => {
       setFormData({
         type: 'expense',
         amount: '',
-        category: 'Food',
+        category: EXPENSE_CATEGORIES[0],
         description: '',
         date: new Date().toISOString().split('T')[0]
       });
@@ -151,7 +154,11 @@ const Transactions = () => {
                 <select 
                   className="form-input" 
                   value={formData.type} 
-                  onChange={e => setFormData({...formData, type: e.target.value})}
+                  onChange={e => {
+                    const newType = e.target.value;
+                    const newCategory = newType === 'income' ? INCOME_CATEGORIES[0] : EXPENSE_CATEGORIES[0];
+                    setFormData({...formData, type: newType, category: newCategory});
+                  }}
                 >
                   <option value="expense">Expense</option>
                   <option value="income">Income</option>
@@ -175,7 +182,7 @@ const Transactions = () => {
                   value={formData.category}
                   onChange={e => setFormData({...formData, category: e.target.value})}
                 >
-                  {DEFAULT_CATEGORIES.map(c => (
+                  {(formData.type === 'income' ? INCOME_CATEGORIES : EXPENSE_CATEGORIES).map(c => (
                     <option key={c} value={c}>{c}</option>
                   ))}
                 </select>
